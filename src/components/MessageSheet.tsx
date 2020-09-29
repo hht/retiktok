@@ -11,6 +11,7 @@ import {
   View,
   Text,
   TextInput,
+  Keyboard,
   Image
 } from 'react-native'
 import {COLORS, DEVICE_HEIGHT, DEVICE_WIDTH} from '../utils'
@@ -20,13 +21,12 @@ const AnimatedBackdrop = Animated.createAnimatedComponent(TouchableOpacity)
 export default ({visible}: {visible: boolean}) => {
   const shared = useSharedValue(0)
   const inputRef = useRef<any>()
+  const height = useSharedValue<number>(0)
   const [keyboardShown, toggleKeyboardShown] = useState(false)
   const animatedStyle = useAnimatedStyle(() => {
     return {
       // bottom: visible ? 0 :
-      bottom: withTiming(
-        visible ? (keyboardShown ? DEVICE_HEIGHT * 0.4 : 0) : -100
-      ),
+      bottom: height.value,
       backgroundColor: interpolateColor(
         shared.value,
         [0, 1],
@@ -46,10 +46,30 @@ export default ({visible}: {visible: boolean}) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyboardShown])
+
+  const keyboardWillShow = (e) => {
+    height.value = withTiming(e?.endCoordinates?.height)
+  }
+  const keyboardWillHide = () => {
+    height.value = withTiming(0)
+  }
+
   useEffect(() => {
-    // shared.value = visible ? 0 : 1
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible])
+    const KeyboardShowSubscriber = Keyboard.addListener(
+      'keyboardWillShow',
+      keyboardWillShow
+    )
+    const KeyboardHideSubscriber = Keyboard.addListener(
+      'keyboardWillHide',
+      keyboardWillHide
+    )
+
+    return () => {
+      KeyboardShowSubscriber.remove()
+      KeyboardHideSubscriber.remove()
+    }
+  }, [])
+
   return (
     <>
       {keyboardShown ? (
