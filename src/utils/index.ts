@@ -16,6 +16,13 @@ export interface VideoProps {
   author: string
   avatar: string
 }
+export interface CommentProps {
+  id: string
+  author: string
+  comment: string
+  createdAt: string
+  avatar: string
+}
 
 export const opacity = (opaci: number, color: string): string => {
   const red = parseInt(color.substring(1, 3), 16)

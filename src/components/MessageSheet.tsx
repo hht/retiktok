@@ -2,14 +2,13 @@ import React, {useEffect, useRef, useState} from 'react'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming
+  withTiming,
+  Easing
 } from 'react-native-reanimated'
 import {interpolateColor} from 'react-native-redash'
 import {
   TouchableOpacity,
   StyleSheet,
-  View,
-  Text,
   TextInput,
   Keyboard,
   Image
@@ -26,7 +25,10 @@ export default ({visible}: {visible: boolean}) => {
   const animatedStyle = useAnimatedStyle(() => {
     return {
       // bottom: visible ? 0 :
-      bottom: height.value,
+      bottom: withTiming(height.value || (visible ? 0 : -100), {
+        duration: 250,
+        easing: Easing.bezier(0.25, 0.1, 0.5, 1)
+      }),
       backgroundColor: interpolateColor(
         shared.value,
         [0, 1],
@@ -48,10 +50,10 @@ export default ({visible}: {visible: boolean}) => {
   }, [keyboardShown])
 
   const keyboardWillShow = (e) => {
-    height.value = withTiming(e?.endCoordinates?.height)
+    height.value = e?.endCoordinates?.height
   }
   const keyboardWillHide = () => {
-    height.value = withTiming(0)
+    height.value = 0
   }
 
   useEffect(() => {

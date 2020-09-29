@@ -1,5 +1,6 @@
 export const QUERY = {
-  VIDEOS: 'QUERY/VIDEOS'
+  VIDEOS: 'QUERY/VIDEOS',
+  COMMENTS: 'QUERY/COMMENTS'
 }
 
 export const COLORS = {

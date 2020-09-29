@@ -1,4 +1,4 @@
-import React, {useCallback, useRef} from 'react'
+import React, {useCallback, useRef, useState, useEffect} from 'react'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -6,6 +6,7 @@ import Animated, {
   withTiming,
   useAnimatedScrollHandler
 } from 'react-native-reanimated'
+import moment from 'dayjs'
 import {
   PanGestureHandler,
   NativeViewGestureHandler
@@ -16,18 +17,34 @@ import {
   View,
   Text,
   FlatList,
-  Image
+  Image,
+  InteractionManager
 } from 'react-native'
-import {COLORS, DEVICE_HEIGHT, DEVICE_WIDTH} from '../utils'
+import {useQuery} from 'react-query'
+import {
+  API,
+  COLORS,
+  CommentProps,
+  DEVICE_HEIGHT,
+  DEVICE_WIDTH,
+  opacity,
+  QUERY
+} from '../utils'
 import SafeBottomArea from './SafeBottomArea'
+import ActivityIndicator from './ActivityIndicator'
 
-const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-
-const renderItem = ({item}) => (
-  <View style={{height: 100}}>
-    <Text>{item}</Text>
+const renderItem = ({item}: {item: CommentProps}) => (
+  <View style={styles.item}>
+    <View style={[styles.avatar, {backgroundColor: item.avatar}]} />
+    <View style={styles.comment}>
+      <Text style={styles.em}>{item.author}</Text>
+      <Text style={styles.content}>{item.comment}</Text>
+      <Text style={styles.em}>{moment(item.createdAt).format('MM-DD')}</Text>
+    </View>
   </View>
 )
+
+const keyExtractor = (comment: CommentProps) => comment.id
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList)
 export default ({
@@ -44,6 +61,7 @@ export default ({
   const scrollViewOffset = useSharedValue(0)
   const prevTranslationY = useSharedValue(0)
 
+  const [t, refersh] = useState(0)
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollViewOffset.value = event.contentOffset.y
@@ -66,7 +84,7 @@ export default ({
   })
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      top: withTiming(visible ? DEVICE_HEIGHT * 0.4 : DEVICE_HEIGHT),
+      top: withTiming(visible ? DEVICE_HEIGHT * 0.25 : DEVICE_HEIGHT),
       transform: [
         {
           translateY: Math.max(0, translateY.value)
@@ -75,6 +93,7 @@ export default ({
     }
   })
   const onClose = useCallback(() => toggleSheetShown(false), [])
+  const {data} = useQuery([QUERY.COMMENTS], API.getComments)
   return (
     <>
       {visible ? (
@@ -90,7 +109,9 @@ export default ({
         onGestureEvent={gestureHandler}>
         <Animated.View style={[styles.sheet, animatedStyle]}>
           <View style={styles.header}>
-            <Text style={styles.title}>500条评论</Text>
+            <Text style={styles.title}>
+              {data?.length ? `${data.length} Comments` : 'Loading...'}
+            </Text>
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={onClose}
@@ -107,11 +128,13 @@ export default ({
             <AnimatedList
               bounces={false}
               showsVerticalScrollIndicator={false}
-              keyExtractor={(item) => `${item}`}
-              data={data}
+              keyExtractor={keyExtractor}
+              data={data ?? []}
+              ListEmptyComponent={ActivityIndicator}
               renderItem={renderItem}
               scrollEventThrottle={16}
               style={styles.list}
+              contentContainerStyle={styles.container}
               onScroll={scrollHandler}
             />
           </NativeViewGestureHandler>
@@ -126,7 +149,7 @@ const styles = StyleSheet.create({
   sheet: {
     position: 'absolute',
     width: DEVICE_WIDTH,
-    height: DEVICE_HEIGHT * 0.6,
+    height: DEVICE_HEIGHT * 0.75,
     zIndex: 10,
     backgroundColor: 'transparent'
   },
@@ -142,7 +165,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    color: COLORS.white
+    color: COLORS.white,
+    fontWeight: '700'
   },
   cross: {
     position: 'absolute',
@@ -159,5 +183,35 @@ const styles = StyleSheet.create({
     resizeMode: 'contain'
   },
   backdrop: {width: DEVICE_WIDTH, height: DEVICE_HEIGHT, zIndex: 1},
-  list: {flex: 1, backgroundColor: COLORS.primary}
+  list: {flex: 1, backgroundColor: COLORS.primary},
+  container: {flexGrow: 1, justifyContent: 'center'},
+
+  item: {
+    padding: 16,
+    flexDirection: 'row',
+    width: '100%'
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+    marginRight: 16,
+    borderRadius: 18,
+    marginTop: 12
+  },
+  comment: {
+    flex: 1
+  },
+  content: {
+    color: COLORS.white,
+    lineHeight: 20,
+    fontSize: 14,
+    fontWeight: '500'
+  },
+  em: {
+    color: opacity(0.6, COLORS.white),
+    marginVertical: 8,
+    lineHeight: 20,
+    fontSize: 12,
+    fontWeight: '500'
+  }
 })
