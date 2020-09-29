@@ -1,6 +1,13 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, memo} from 'react'
 import {useQuery} from 'react-query'
-import {View, Text, StyleSheet, FlatList} from 'react-native'
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity
+} from 'react-native'
 import Video from 'react-native-video'
 import {
   API,
@@ -19,21 +26,46 @@ const Description = ({item}: {item: VideoProps}) => (
   </View>
 )
 
-const VideoItem = ({item, paused}: {item: VideoProps; paused: boolean}) => (
-  <View style={styles.video}>
-    <Video
-      source={{uri: item.playaddr}}
-      poster={item.coverurl}
-      style={styles.video}
-      paused={paused}
-      resizeMode="cover"
-      repeat
+const MessageButton = memo(({onPress}: {onPress: Function}) => (
+  <TouchableOpacity
+    activeOpacity={0.8}
+    onPress={() => {
+      onPress(true)
+    }}
+    style={styles.btn}>
+    <Image
+      style={styles.image}
+      source={require('../assets/images/message.png')}
     />
-    <Description item={item} />
-  </View>
+  </TouchableOpacity>
+))
+
+const VideoItem = memo(
+  ({
+    item,
+    paused,
+    toggleSheetShown
+  }: {
+    item: VideoProps
+    paused: boolean
+    toggleSheetShown: Function
+  }) => (
+    <View style={styles.video}>
+      <Video
+        source={{uri: item.playaddr}}
+        poster={item.coverurl}
+        style={styles.video}
+        paused={paused}
+        resizeMode="cover"
+        repeat
+      />
+      <Description item={item} />
+      <MessageButton onPress={toggleSheetShown} />
+    </View>
+  )
 )
 
-const Widget = () => {
+const Widget = ({toggleSheetShown}: {toggleSheetShown: Function}) => {
   const {data} = useQuery(QUERY.VIDEOS, API.getVideos)
   const [current, setCurrent] = useState<VideoProps | undefined>(undefined)
   const viewabilityConfig = useRef({
@@ -57,6 +89,7 @@ const Widget = () => {
           <VideoItem
             item={item}
             paused={current?.hotindex !== item?.hotindex}
+            toggleSheetShown={toggleSheetShown}
           />
         )}
         pagingEnabled
@@ -92,5 +125,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.white,
     lineHeight: 20
+  },
+  btn: {
+    width: 64,
+    height: 64,
+    position: 'absolute',
+    right: 16,
+    bottom: DEVICE_HEIGHT * 0.4,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  image: {
+    width: 48,
+    height: 48
   }
 })

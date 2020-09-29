@@ -7,14 +7,16 @@
  *
  * @format
  */
-import React from 'react'
+import React, {useState} from 'react'
 import {StyleSheet, View} from 'react-native'
-import VideoSwiper from './components/VideoSwiper'
+import {BottomSheet, VideoSwiper} from './components'
 
 const App = () => {
+  const [sheetShown, toggleSheetShown] = useState(false)
   return (
     <View style={StyleSheet.absoluteFill}>
-      <VideoSwiper />
+      <VideoSwiper toggleSheetShown={toggleSheetShown} />
+      <BottomSheet visible={sheetShown} toggleSheetShown={toggleSheetShown} />
     </View>
   )
 }
