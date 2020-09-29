@@ -9,7 +9,7 @@
  */
 import React, {useState} from 'react'
 import {StyleSheet, View} from 'react-native'
-import {BottomSheet, VideoSwiper} from './components'
+import {BottomSheet, VideoSwiper, MessageSheet} from './components'
 
 const App = () => {
   const [sheetShown, toggleSheetShown] = useState(false)
@@ -17,6 +17,7 @@ const App = () => {
     <View style={StyleSheet.absoluteFill}>
       <VideoSwiper toggleSheetShown={toggleSheetShown} />
       <BottomSheet visible={sheetShown} toggleSheetShown={toggleSheetShown} />
+      <MessageSheet visible={sheetShown} />
     </View>
   )
 }

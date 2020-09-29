@@ -13,7 +13,6 @@ export const getVideos = async () => {
       params: {key: TIKTOK_KEY}
     })
     .then(({data}) => {
-      console.log((data?.newslist ?? []).map((it) => it.playaddr))
       return data?.newslist ?? []
     })
   await AsyncStorage.setItem('@videos', JSON.stringify(videos))

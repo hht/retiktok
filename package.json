@@ -16,6 +16,7 @@
     "react-native": "0.63.2",
     "react-native-gesture-handler": "^1.8.0",
     "react-native-reanimated": "^2.0.0-alpha.7",
+    "react-native-redash": "^15.5.2",
     "react-native-video": "^5.1.0-alpha8",
     "react-query": "^2.23.0"
   },

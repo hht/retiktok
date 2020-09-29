@@ -16,10 +16,10 @@ import {
   View,
   Text,
   FlatList,
-  SafeAreaView,
   Image
 } from 'react-native'
 import {COLORS, DEVICE_HEIGHT, DEVICE_WIDTH} from '../utils'
+import SafeBottomArea from './SafeBottomArea'
 
 const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
@@ -115,9 +115,7 @@ export default ({
               onScroll={scrollHandler}
             />
           </NativeViewGestureHandler>
-          <SafeAreaView style={styles.footer}>
-            <View style={styles.bottom} />
-          </SafeAreaView>
+          <SafeBottomArea color={COLORS.black} />
         </Animated.View>
       </PanGestureHandler>
     </>
@@ -161,11 +159,5 @@ const styles = StyleSheet.create({
     resizeMode: 'contain'
   },
   backdrop: {width: DEVICE_WIDTH, height: DEVICE_HEIGHT, zIndex: 1},
-  list: {flex: 1, backgroundColor: COLORS.primary},
-  footer: {
-    backgroundColor: COLORS.black
-  },
-  bottom: {
-    height: 48
-  }
+  list: {flex: 1, backgroundColor: COLORS.primary}
 })
